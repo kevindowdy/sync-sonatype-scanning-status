@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.0] - 2026-10-08
+
 ### Added
 
 - `sync-sonatype-scanning-status` tool: finds Non Compliant APM versions whose
@@ -18,7 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Initial project template: source layout, test scaffolding, CI/CD
   workflows, and contributor documentation.
 
-## [0.1.0] - 2026-09-02
+## [0.0.0] - 2026-09-02
 
 ### Added
 
