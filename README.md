@@ -23,6 +23,38 @@ logic.
    go mod download
    ```
 
+## sync-sonatype-scanning-status
+
+Workflow: run `process-scanning-data`, run this tool, then run
+`process-scanning-data` again so the refreshed Sonatype dates flow into the
+final report.
+
+1. Reads the compliance workbook (`-compliance-file`) and keeps rows where
+   `Ext Scanning` is Non Compliant and `SNT Age` is over 90 days (or blank),
+   dropping rows already stale because of Fortify or WebInspect
+   (`FOP AGE`/`WI AGE` over 90, or status Out of Scope). The `zvx`
+   (`<APM> <version>`) value of each row is the key.
+2. `GET`s the Sonatype reports endpoint, and for each key looks for a
+   `release`-stage result whose report URL contains the key and whose
+   `evaluationDate` is within 90 days.
+3. Writes the newest such date (`YYYY-MM-DD`) into `Last_Sonatype_Scan_Dt` of
+   the raw scans file (`-scans-file`, .csv or .xlsx) on rows where
+   `AMAPM_Number` and `Release/Version` match. Columns are located by header
+   name, not letter. Writes are atomic.
+
+| Setting | Flag / env | Notes |
+| --- | --- | --- |
+| Compliance workbook | `-compliance-file` / `COMPLIANCE_FILE` | required |
+| Raw scans file | `-scans-file` / `SCANS_FILE` | required |
+| Sonatype endpoint | `-sonatype-url` / `SONATYPE_URL` | required; GET returning a JSON array of `{stage, evaluationDate, reportHtmlUrl}` |
+| Cookie auth | `SONATYPE_COOKIE` | raw `Cookie` header value; wins over basic auth |
+| Basic auth | `SONATYPE_USERNAME`, `SONATYPE_PASSWORD` | used when no cookie |
+| Dry run | `-dry-run` | log changes without writing |
+
+```sh
+SONATYPE_COOKIE='...' go run ./src -compliance-file today.xlsx -scans-file scans.csv -sonatype-url https://iq.example.com/api/v2/reports/applications
+```
+
 ## Run Instructions
 
 Run the application directly:
